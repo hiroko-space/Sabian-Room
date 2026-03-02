@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sabian Translation Room</title>
+  <meta name="description" content="構造から読むサビアンシンボル。意味付けや使命に疑問を感じる方へ。">
+
+  <style>
+    :root{
+      --pad: clamp(22px, 4.5vw, 64px);
+      --max: 920px;
+
+      /* 0=day, 1=night */
+      --t: 0;
+
+      /* 呼吸 0..1 */
+      --breath: 0;
+
+      /* 切替スピード：読みやすさ優先でゆっくり */
+      --fade: 4200ms;
+
+      /* 文字：背景が変わっても読めるように“差”を大きく */
+      --ink-day: #141416;
+      --ink-night: #fbf9ff;
+
+      --muted-day: rgba(20,20,22,.68);
+      --muted-night: rgba(251,249,255,.72);
+
+      /* 本文の背面に敷く薄い膜（枠じゃない） */
+      --sheet-day: rgba(255,255,255,.62);
+      --sheet-night: rgba(18,10,26,.40);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+      letter-spacing:.02em;
+      line-height:1.95;
+      overflow-x:hidden;
+
+      color: color-mix(in oklab, var(--ink-day) calc((1 - var(--t))*100%), var(--ink-night) calc(var(--t)*100%));
+      transition: color var(--fade) ease;
+
+      /* 白い深宇宙 → あなたの夜色（連続） */
+      background:
+        radial-gradient(1200px 900px at 50% 15%,
+          color-mix(in oklab, #ffffff calc((1 - var(--t))*100%), rgba(255,122,167,.25) calc(var(--t)*100%)) 0%,
+          transparent 60%),
+        radial-gradient(1200px 900px at 50% 75%,
+          color-mix(in oklab, #eef1ff calc((1 - var(--t))*100%), rgba(123,44,191,.35) calc(var(--t)*100%)) 0%,
+          transparent 62%),
+        linear-gradient(180deg,
+          color-mix(in oklab, #ffffff calc((1 - var(--t))*100%), #2b0f2a calc(var(--t)*100%)) 0%,
+          color-mix(in oklab, #f6f3ff calc((1 - var(--t))*100%), #ff7aa7 calc(var(--t)*100%)) 55%,
+          color-mix(in oklab, #ffffff calc((1 - var(--t))*100%), #4a2a6b calc(var(--t)*100%)) 100%);
+      transition: background var(--fade) ease;
+
+      /* 呼吸：明暗をほんの少しだけ揺らす */
+      filter: brightness(calc(1 - var(--t)*0.06 + var(--breath)*0.030)) saturate(1.02);
+    }
+
+    /* 夜だけ薄い星 */
+    .stars{
+      position: fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:-1;
+      opacity: calc(var(--t) * (0.10 + var(--breath)*0.10));
+      transition: opacity var(--fade) ease;
+      mix-blend-mode: screen;
+      filter: blur(.15px);
+    }
+    .stars::before{
+      content:"";
+      position:absolute;
+      inset:-25%;
+      background-image:
+        radial-gradient(1px 1px at 10% 18%, rgba(255,255,255,.85) 60%, transparent 61%),
+        radial-gradient(1px 1px at 35% 14%, rgba(255,255,255,.60) 60%, transparent 61%),
+        radial-gradient(1px 1px at 56% 26%, rgba(255,255,255,.70) 60%, transparent 61%),
+        radial-gradient(1px 1px at 72% 18%, rgba(255,255,255,.55) 60%, transparent 61%),
+        radial-gradient(1px 1px at 84% 30%, rgba(255,255,255,.68) 60%, transparent 61%),
+        radial-gradient(1px 1px at 22% 56%, rgba(255,255,255,.52) 60%, transparent 61%),
+        radial-gradient(1px 1px at 48% 62%, rgba(255,255,255,.62) 60%, transparent 61%),
+        radial-gradient(1px 1px at 78% 70%, rgba(255,255,255,.58) 60%, transparent 61%),
+        radial-gradient(1px 1px at 14% 78%, rgba(255,255,255,.66) 60%, transparent 61%),
+        radial-gradient(1px 1px at 66% 82%, rgba(255,255,255,.56) 60%, transparent 61%);
+      background-repeat:no-repeat;
+      opacity:.75;
+      animation: twinkle 8.6s ease-in-out infinite;
+    }
+    @keyframes twinkle{
+      0%,100%{ transform: translateY(0px); opacity:.55; }
+      50%{ transform: translateY(-2px); opacity:.85; }
+    }
+
+    main{
+      width:100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: var(--pad);
+      padding-top: calc(var(--pad) * 1.05);
+      padding-bottom: calc(var(--pad) * 1.35);
+      position: relative;
+    }
+
+    /* 枠じゃなく“膜”：読んでる最中に色が変わっても文字を見失わない */
+    main::before{
+      content:"";
+      position:absolute;
+      inset: calc(var(--pad) * 0.35);
+      border-radius: 28px;
+      background: color-mix(in oklab, var(--sheet-day) calc((1 - var(--t))*100%), var(--sheet-night) calc(var(--t)*100%));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: background var(--fade) ease;
+      z-index: -1;
+    }
+
+    .title{
+      font-size: clamp(20px, 2.2vw, 26px);
+      letter-spacing:.02em;
+      margin: 0 0 8px;
+    }
+
+    /* タイトル直下：指定の行 */
+    .subtitle{
+      margin: 0 0 24px;
+      font-size: 14px;
+      opacity: .82;
+      white-space: pre;
+    }
+
+    .muted{
+      color: color-mix(in oklab, var(--muted-day) calc((1 - var(--t))*100%), var(--muted-night) calc(var(--t)*100%));
+      transition: color var(--fade) ease;
+    }
+
+    /* 読みやすさ：薄い影だけ（枠じゃない） */
+    .readable{
+      text-shadow:
+        0 1px 0 rgba(0,0,0,.04),
+        0 10px 24px rgba(0,0,0,.10);
+      transition: text-shadow var(--fade) ease;
+    }
+
+    .block{ margin: 20px 0 26px; }
+    .lead{
+      margin: 0;
+      font-size: 15px;
+      white-space: pre-line;
+    }
+
+    .for{
+      margin-top: 10px;
+      white-space: pre-line;
+      font-size: 14px;
+      opacity: .92;
+    }
+
+    .sampleHead{
+      margin: 22px 0 10px;
+      font-size: 13px;
+      letter-spacing: .06em;
+      opacity: .78;
+    }
+
+    pre.sample{
+      margin: 0;
+      padding: 0;
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      line-height: 1.9;
+      opacity: .95;
+    }
+
+    /* 署名（杖） */
+    .sig{
+      position: fixed;
+      right: 16px;
+      bottom: 14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      z-index: 5;
+      opacity: .78;
+      transition: opacity var(--fade) ease;
+      color: color-mix(in oklab, rgba(0,0,0,.42) calc((1 - var(--t))*100%), rgba(255,255,255,.58) calc(var(--t)*100%));
+      user-select:none;
+    }
+    .sig:hover{ opacity: .95; }
+
+    .staff{
+      width: 26px;
+      height: 26px;
+      filter: drop-shadow(0 12px 26px rgba(0,0,0,.18));
+    }
+    .sig small{
+      font-size: 11px;
+      letter-spacing: .08em;
+      opacity: .64;
+      line-height: 1.25;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *{ transition: none !important; animation: none !important; }
+      .stars{ display:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stars" aria-hidden="true"></div>
+
+  <main class="readable">
+    <h1 class="title">🌓 Sabian Translation Room</h1>
+    <p class="subtitle muted">　　　　　　　　　構造から読むサビアンシンボル</p>
+
+    <div class="block">
+      <p class="lead">for</p>
+      <p class="for">意味付けや使命に疑問を感じる、子どもの性質を構造で知りたい方</p>
+    </div>
+
+    <div class="block">
+      <p class="sampleHead muted">sample / 作者のヘリオ水星</p>
+<pre class="sample">〔水星〕〔おとめ座〕〔20度〕
+（視点の処理方法）※ヘリオ
+
+A caravan of cars headed to the West Coast.
+
+構造訳：
+・複数の車
+・同じ方向へ進行
+・列をなしている
+・目的地は西海岸
+・移動中
+・先頭と後続がある
+・道の上
+
+自然体：
+考えを一つずつ並べながら同じ方向へ進む。
+内側で複数の視点が整列している。
+
+近くで見ている人から：
+思考が単発ではなく、まとまりとして続く。
+一台ではなく、連なりとして伝わる。
+
+もう一つの目線：
+ただの移動が、明確な行き先を帯びる。</pre>
+    </div>
+  </main>
+
+  <!-- Hermes staff（翼＋蛇の“杖”っぽい印） -->
+  <div class="sig" aria-hidden="true" title="Hermes">
+    <svg class="staff" viewBox="0 0 64 64" fill="none">
+      <!-- staff -->
+      <path d="M32 10v44" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" opacity=".92"/>
+      <!-- wing -->
+      <path d="M32 14c-7 0-13 5-16 10 7-3 11-2 16 2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" opacity=".72"/>
+      <path d="M32 14c7 0 13 5 16 10-7-3-11-2-16 2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" opacity=".72"/>
+      <!-- twin serpents (suggested) -->
+      <path d="M26 22c-4 2-4 7 0 9s4 7 0 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity=".78"/>
+      <path d="M38 22c4 2 4 7 0 9s-4 7 0 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity=".78"/>
+      <!-- heads -->
+      <circle cx="26" cy="22" r="1.6" fill="currentColor" opacity=".78"/>
+      <circle cx="38" cy="22" r="1.6" fill="currentColor" opacity=".78"/>
+      <!-- top bead -->
+      <circle cx="32" cy="10" r="3.2" fill="currentColor" opacity=".92"/>
+    </svg>
+
+    <div style="display:flex; flex-direction:column; gap:2px;">
+      <small>Hermes</small>
+      <small style="opacity:.55;">静かなLight Emperor</small>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * 自動循環：見ているだけで必ず滑らかに移る
+     * 読みやすさ優先：周期を長めにして、変化はゆっくり
+     */
+    const root = document.documentElement;
+
+    let t0 = performance.now();
+    const period = 78000; // 78秒で day→night→day（ゆっくり）
+
+    function smoothstep(x){ return x*x*(3 - 2*x); }
+
+    function tick(now){
+      const p = (now - t0) / period;            // 0..∞
+      const s = (Math.sin(p * Math.PI * 2) + 1) / 2; // 0..1..0
+      const t = smoothstep(s);
+
+      // 呼吸：夜側にだけ薄く
+      const b = ((Math.sin(p * Math.PI * 2 * 3.2) + 1) / 2) * t * 0.95;
+
+      root.style.setProperty('--t', t.toFixed(4));
+      root.style.setProperty('--breath', b.toFixed(4));
+
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
